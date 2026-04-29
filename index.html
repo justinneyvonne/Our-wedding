@@ -30,9 +30,57 @@
 </div>
 <div class="card">
     <h2>📸 Share Your Photos</h2>
-    <a href="PASTE_LINK_HERE" class="btn btn-gold">Tap to Upload Photos</a>
-    <div class="hashtag">#JustinAndYvonne2026</div>
+    <p>Help us capture the memories!</p>
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="uploadFile()">
+    <button onclick="document.getElementById('fileInput').click()" class="btn btn-gold" id="uploadBtn">Choose a Photo</button>
+    <div id="status" style="margin-top:10px; font-weight:bold;"></div>
 </div>
+
+<script>
+async function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const status = document.getElementById('status');
+    const btn = document.getElementById('uploadBtn');
+    const file = fileInput.files[0];
+
+    if (!file) return;
+
+    status.innerText = "⏳ Uploading to Justin & Yvonne's Drive...";
+    status.style.color = "#2c3e50";
+    btn.disabled = true;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+        const base64 = reader.result.split(',')[1];
+        const payload = {
+            base64: base64,
+            fileName: file.name,
+            mimeType: file.type
+        };
+
+        try {
+            const response = await fetch('https://script.google.com/macros/s/AKfycbxC-jcm96v9OhUmxsLQFJq7MPBf9d6WTj68UBjH6sInNFbKzFvXUopo2bglnNT92xrJ/exec', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const result = await response.text();
+            if (result === "Success") {
+                status.innerText = "✅ Upload Successful!";
+                status.style.color = "green";
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            status.innerText = "❌ Upload failed. Please try again.";
+            status.style.color = "red";
+        } finally {
+            btn.disabled = false;
+            fileInput.value = ""; // Clear for next photo
+        }
+    };
+}
+</script>
 <div>
     <p> Due to frequent power outages and wifi sevices and other unexplanned items these links make not work</p>
 </div>
